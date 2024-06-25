@@ -19,3 +19,14 @@ func ToCategoryResponses(categories []domain.Category) []response.CategoryRespon
 	}
 	return categoryResponses
 }
+
+func ToProductResponse(product domain.Product) response.ProductResponse {
+	return response.ProductResponse{
+		Id:          product.Id,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		CategoryId:  product.CategoryId,
+	}
+}
