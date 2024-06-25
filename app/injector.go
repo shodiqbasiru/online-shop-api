@@ -6,8 +6,10 @@ package app
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"online-shop-api/controller"
+	"online-shop-api/middleware"
 	"online-shop-api/repository"
 	"online-shop-api/service"
 )
@@ -28,6 +30,8 @@ func InitializedServer() *http.Server {
 		service.NewProductService,
 		controller.NewProductController,
 		NewRouter,
+		wire.Bind(new(http.Handler), new(*httprouter.Router)),
+		middleware.NewAuthMiddleware,
 		NewServer,
 	)
 

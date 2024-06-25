@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/julienschmidt/httprouter"
 	"online-shop-api/controller"
+	"online-shop-api/exception"
 )
 
 func NewRouter(categoryController *controller.CategoryController, productController *controller.ProductController) *httprouter.Router {
@@ -21,6 +22,8 @@ func NewRouter(categoryController *controller.CategoryController, productControl
 	router.GET("/api/products", productController.FindAll)
 	router.PUT("/api/products/:productId", productController.Update)
 	router.DELETE("/api/products/:productId", productController.Delete)
+
+	router.PanicHandler = exception.ErrorHandler
 
 	return router
 }

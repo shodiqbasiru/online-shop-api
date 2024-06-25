@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-playground/validator/v10"
+	"online-shop-api/exception"
 	"online-shop-api/helper"
 	"online-shop-api/model/domain"
 	"online-shop-api/model/dto/request"
@@ -43,7 +44,9 @@ func (service *CategoryServiceImpl) GetById(ctx context.Context, categoryId stri
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, categoryId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	return helper.ToCategoryResponse(category)
 }
@@ -66,7 +69,9 @@ func (service *CategoryServiceImpl) UpdateCategory(ctx context.Context, request 
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, request.Id)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	category.Name = request.Name
 
@@ -81,7 +86,9 @@ func (service *CategoryServiceImpl) DeleteCategory(ctx context.Context, category
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, categoryId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	service.CategoryRepository.Delete(ctx, tx, category)
 }
