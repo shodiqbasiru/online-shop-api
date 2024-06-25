@@ -67,6 +67,6 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx
 
 func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, category domain.Category) {
 	query := "DELETE FROM m_category WHERE id = ?"
-	_, err := tx.ExecContext(ctx, query)
+	_, err := tx.ExecContext(ctx, query, category.Id)
 	helper.PanicIfError(err)
 }
