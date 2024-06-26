@@ -1,15 +1,15 @@
 package app
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"online-shop-api/helper"
+	"online-shop-api/middleware"
 )
 
-func NewServer(router *httprouter.Router) *http.Server {
+func NewServer(authMiddleware *middleware.AuthMiddleware) *http.Server {
 	return &http.Server{
 		Addr:    "localhost:7720",
-		Handler: router,
+		Handler: authMiddleware,
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"online-shop-api/controller"
+	"online-shop-api/middleware"
 	"online-shop-api/repository"
 	"online-shop-api/service"
 )
@@ -26,8 +27,12 @@ func InitializedServer() *http.Server {
 	productRepository := repository.NewProductRepository()
 	productService := service.NewProductService(productRepository, categoryService, db, validate)
 	productController := controller.NewProductController(productService)
-	router := NewRouter(categoryController, productController)
-	server := NewServer(router)
+	userRepository := repository.NewUserRepository()
+	authService := service.NewAuthService(userRepository, db, validate)
+	authController := controller.NewAuthController(authService)
+	router := NewRouter(categoryController, productController, authController)
+	authMiddleware := middleware.NewAuthMiddleware(router)
+	server := NewServer(authMiddleware)
 	return server
 }
 

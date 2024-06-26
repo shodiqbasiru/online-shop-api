@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-playground/validator/v10"
+	"online-shop-api/exception"
 	"online-shop-api/helper"
 	"online-shop-api/model/domain"
 	"online-shop-api/model/dto/request"
@@ -50,7 +51,9 @@ func (service *ProductServiceImpl) GetById(ctx context.Context, productId string
 	defer helper.CommitOrRollback(tx)
 
 	product, err := service.ProductRepository.FindById(ctx, tx, productId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	return helper.ToProductResponse(product)
 }
@@ -79,7 +82,9 @@ func (service *ProductServiceImpl) UpdateProduct(ctx context.Context, request re
 	defer helper.CommitOrRollback(tx)
 
 	product, err := service.ProductRepository.FindById(ctx, tx, request.Id)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	category := service.CategoryService.GetById(ctx, request.CategoryId)
 
@@ -100,7 +105,9 @@ func (service *ProductServiceImpl) DeleteProduct(ctx context.Context, productId 
 	defer helper.CommitOrRollback(tx)
 
 	product, err := service.ProductRepository.FindById(ctx, tx, productId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	service.ProductRepository.Delete(ctx, tx, product)
 }
