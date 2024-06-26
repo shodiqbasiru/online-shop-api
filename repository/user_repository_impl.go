@@ -18,8 +18,8 @@ func NewUserRepository() UserRepository {
 
 func (repository *UserRepositoryImpl) Register(ctx context.Context, tx *sql.Tx, user domain.User) domain.User {
 	user.Id = uuid.New().String()
-	query := "INSERT INTO m_user(id, name, no_hp, email, password, role) VALUES (?,?,?,?,?,?)"
-	_, err := tx.ExecContext(ctx, query, user.Id, user.Name, user.NoHp, user.Email, user.Password, user.Role)
+	query := "INSERT INTO m_user(id, no_hp, email, password, role, customer_id) VALUES (?,?,?,?,?,?)"
+	_, err := tx.ExecContext(ctx, query, user.Id, user.NoHp, user.Email, user.Password, user.Role, user.CustomerId)
 	helper.PanicIfError(err)
 	return user
 }
@@ -41,7 +41,7 @@ func (repository *UserRepositoryImpl) Login(ctx context.Context, tx *sql.Tx, ema
 }
 
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, userId int) (domain.User, error) {
-	query := "SELECT id, name, no_hp, email, password, role FROM m_user WHERE id = ?"
+	query := "SELECT id, no_hp, email, password, role, customer_id FROM m_user WHERE id = ?"
 	rows, err := tx.QueryContext(ctx, query, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -50,11 +50,11 @@ func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, 
 	if rows.Next() {
 		err := rows.Scan(
 			&user.Id,
-			&user.Name,
 			&user.NoHp,
 			&user.Email,
 			&user.Password,
 			&user.Role,
+			&user.CustomerId,
 		)
 		helper.PanicIfError(err)
 
@@ -65,7 +65,7 @@ func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.Tx, email string) (domain.User, error) {
-	query := "SELECT id, name, no_hp, email, password, role FROM m_user WHERE email = ?"
+	query := "SELECT id, no_hp, email, password, role,customer_id FROM m_user WHERE email = ?"
 	rows, err := tx.QueryContext(ctx, query, email)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -74,11 +74,11 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 	if rows.Next() {
 		err := rows.Scan(
 			&user.Id,
-			&user.Name,
 			&user.NoHp,
 			&user.Email,
 			&user.Password,
 			&user.Role,
+			&user.CustomerId,
 		)
 		helper.PanicIfError(err)
 
@@ -89,7 +89,7 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 }
 
 func (repository *UserRepositoryImpl) FindByEmailOrNoHp(ctx context.Context, tx *sql.Tx, emailOrNoHp string) (domain.User, error) {
-	query := "SELECT id,name,password,role FROM m_user WHERE email = ? OR no_hp = ?"
+	query := "SELECT id,password,role FROM m_user WHERE email = ? OR no_hp = ?"
 	rows, err := tx.QueryContext(ctx, query, emailOrNoHp, emailOrNoHp)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -97,7 +97,7 @@ func (repository *UserRepositoryImpl) FindByEmailOrNoHp(ctx context.Context, tx 
 	var user domain.User
 	if rows.Next() {
 		role := user.Role.String()
-		err := rows.Scan(&user.Id, &user.Name, &user.Password, &role)
+		err := rows.Scan(&user.Id, &user.Password, &role)
 		helper.PanicIfError(err)
 		return user, nil
 	} else {
@@ -106,7 +106,7 @@ func (repository *UserRepositoryImpl) FindByEmailOrNoHp(ctx context.Context, tx 
 }
 
 func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.User {
-	query := "SELECT id, name, no_hp, email, password, role FROM m_user ORDER BY created_at DESC"
+	query := "SELECT id, no_hp, email, password, role, customer_id FROM m_user ORDER BY created_at DESC"
 	rows, err := tx.QueryContext(ctx, query)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -116,11 +116,11 @@ func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) [
 		user := domain.User{}
 		err := rows.Scan(
 			&user.Id,
-			&user.Name,
 			&user.NoHp,
 			&user.Email,
 			&user.Password,
 			&user.Role,
+			&user.CustomerId,
 		)
 		helper.PanicIfError(err)
 		users = append(users, user)
@@ -129,8 +129,8 @@ func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) [
 }
 
 func (repository *UserRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user domain.User) domain.User {
-	query := "UPDATE m_user SET name = ?, no_hp = ?, email = ?, password = ?, role = ? WHERE id = ?"
-	_, err := tx.ExecContext(ctx, query, user.Name, user.NoHp, user.Email, user.Password, user.Role, user.Id)
+	query := "UPDATE m_user SET no_hp = ?, email = ?, password = ?, role = ? WHERE id = ?"
+	_, err := tx.ExecContext(ctx, query, user.NoHp, user.Email, user.Password, user.Role, user.Id)
 	helper.PanicIfError(err)
 
 	return user

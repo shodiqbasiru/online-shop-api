@@ -1,8 +1,8 @@
 package request
 
 type RegisterRequest struct {
-	Name     string `json:"name"`
-	NoHp     string `json:"noHp"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	CustomerName string `validate:"required" json:"customerName"`
+	NoHp         string `validate:"required" json:"noHp"`
+	Email        string `validate:"required" json:"email"`
+	Password     string `validate:"required" json:"password"`
 }

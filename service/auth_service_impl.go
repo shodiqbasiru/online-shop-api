@@ -15,12 +15,13 @@ import (
 
 type AuthServiceImpl struct {
 	repository.UserRepository
+	CustomerService
 	DB       *sql.DB
 	validate *validator.Validate
 }
 
-func NewAuthService(userRepository repository.UserRepository, DB *sql.DB, validate *validator.Validate) AuthService {
-	return &AuthServiceImpl{UserRepository: userRepository, DB: DB, validate: validate}
+func NewAuthService(userRepository repository.UserRepository, customerService CustomerService, DB *sql.DB, validate *validator.Validate) AuthService {
+	return &AuthServiceImpl{UserRepository: userRepository, CustomerService: customerService, DB: DB, validate: validate}
 }
 
 func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request request.RegisterRequest) response.RegisterResponse {
@@ -35,20 +36,29 @@ func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request reques
 	password, err := helper.HashPassword(request.Password)
 	helper.PanicIfError(err)
 
-	user := domain.User{
-		Name:     request.Name,
-		NoHp:     request.NoHp,
-		Email:    request.Email,
-		Password: password,
-		Role:     roleUser,
+	customer := domain.Customer{
+		CustomerName: request.CustomerName,
 	}
-	user = service.Register(ctx, tx, user)
+
+	customer, err = service.CustomerService.CreateCustomer(ctx, customer)
+	helper.PanicIfError(err)
+
+	user := domain.User{
+		NoHp:       request.NoHp,
+		Email:      request.Email,
+		Password:   password,
+		Role:       roleUser,
+		CustomerId: customer.Id,
+	}
+
+	user = service.UserRepository.Register(ctx, tx, user)
+
 	return response.RegisterResponse{
-		Id:    user.Id,
-		Name:  user.Name,
-		NoHp:  user.NoHp,
-		Email: user.Email,
-		Role:  user.Role.String(),
+		Id:           user.Id,
+		CustomerName: customer.CustomerName,
+		NoHp:         user.NoHp,
+		Email:        user.Email,
+		Role:         user.Role.String(),
 	}
 }
 
@@ -75,7 +85,6 @@ func (service *AuthServiceImpl) LoginUser(ctx context.Context, request request.L
 
 	return response.LoginResponse{
 		Id:    user.Id,
-		Name:  user.Name,
 		Role:  user.Role.String(),
 		Token: token,
 	}

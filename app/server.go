@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/fatih/color"
 	"net/http"
 	"online-shop-api/helper"
 	"online-shop-api/middleware"
@@ -15,6 +16,11 @@ func NewServer(authMiddleware *middleware.AuthMiddleware) *http.Server {
 
 func RunServer() {
 	server := InitializedServer()
+
+	text := color.New(color.FgGreen).PrintFunc()
+	text("Server is running on ", server.Addr, " ...\n")
+
 	err := server.ListenAndServe()
 	helper.PanicIfError(err)
+
 }

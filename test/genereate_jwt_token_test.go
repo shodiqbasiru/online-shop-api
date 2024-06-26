@@ -10,7 +10,6 @@ import (
 func TestGenerateToken(t *testing.T) {
 	user := domain.User{
 		Id:       "userId 1",
-		Name:     "Fulan",
 		NoHp:     "08123567",
 		Email:    "email.@gmail.com",
 		Password: "password",

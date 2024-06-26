@@ -1,12 +1,12 @@
 package domain
 
 type User struct {
-	Id       string
-	Name     string
-	NoHp     string
-	Email    string
-	Password string
-	Role     Role
+	Id         string
+	NoHp       string
+	Email      string
+	Password   string
+	Role       Role
+	CustomerId string
 }
 
 type Role int

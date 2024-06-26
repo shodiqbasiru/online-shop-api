@@ -10,6 +10,7 @@ func NewRouter(
 	categoryController *controller.CategoryController,
 	productController *controller.ProductController,
 	authController *controller.AuthController,
+	customerController *controller.CustomerController,
 ) *httprouter.Router {
 	router := httprouter.New()
 
@@ -30,6 +31,12 @@ func NewRouter(
 	// Auth Endpoint
 	router.POST("/api/auth/register", authController.Register)
 	router.POST("/api/auth/login", authController.LoginUser)
+
+	// Customer EndPoint
+	router.GET("/api/customers", customerController.FindAll)
+	router.GET("/api/customers/:customerId", customerController.FindById)
+	router.PUT("/api/customers/:customerId", customerController.Update)
+	router.DELETE("/api/customers/:customerId", customerController.Delete)
 
 	router.PanicHandler = exception.ErrorHandler
 
