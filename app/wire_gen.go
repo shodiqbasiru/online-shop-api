@@ -27,7 +27,10 @@ func InitializedServer() *http.Server {
 	productRepository := repository.NewProductRepository()
 	productService := service.NewProductService(productRepository, categoryService, db, validate)
 	productController := controller.NewProductController(productService)
-	router := NewRouter(categoryController, productController)
+	userRepository := repository.NewUserRepository()
+	authService := service.NewAuthService(userRepository, db, validate)
+	authController := controller.NewAuthController(authService)
+	router := NewRouter(categoryController, productController, authController)
 	authMiddleware := middleware.NewAuthMiddleware(router)
 	server := NewServer(authMiddleware)
 	return server
