@@ -89,6 +89,8 @@ func notFoundError(writer http.ResponseWriter, request *http.Request, err interf
 }
 
 func internalServerError(writer http.ResponseWriter, request *http.Request, err interface{}) {
+	//exception, ok := err.(InternalServerError)
+	//if ok {
 	writer.Header().Add("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusInternalServerError)
 
@@ -100,4 +102,8 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, err 
 
 	errEncode := json.NewEncoder(writer).Encode(commonResponse)
 	helper.PanicIfError(errEncode)
+	//return true
+	//} else {
+	//	return false
+	//}
 }

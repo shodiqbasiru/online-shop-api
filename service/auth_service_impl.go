@@ -10,6 +10,7 @@ import (
 	"online-shop-api/model/dto/request"
 	"online-shop-api/model/dto/response"
 	"online-shop-api/repository"
+	"online-shop-api/utils"
 )
 
 type AuthServiceImpl struct {
@@ -69,9 +70,13 @@ func (service *AuthServiceImpl) LoginUser(ctx context.Context, request request.L
 		panic(exception.NewBadRequestError("email or password is wrong"))
 	}
 
+	token, err := utils.GenerateJwtToken(user)
+	helper.PanicIfError(err)
+
 	return response.LoginResponse{
-		Id:   user.Id,
-		Name: user.Name,
-		Role: user.Role.String(),
+		Id:    user.Id,
+		Name:  user.Name,
+		Role:  user.Role.String(),
+		Token: token,
 	}
 }

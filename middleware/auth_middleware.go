@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"online-shop-api/helper"
 	"online-shop-api/model/dto/response"
+	"online-shop-api/utils"
+	"strings"
 )
 
 type AuthMiddleware struct {
@@ -22,18 +24,28 @@ func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request 
 		return
 	}
 
-	if "RAHASIA" == request.Header.Get("X-API-Key") {
-		middleware.Handler.ServeHTTP(writer, request)
-	} else {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusUnauthorized)
-
-		commonResponse := response.CommonResponse{
-			Code:   http.StatusUnauthorized,
-			Status: "UNAUTHORIZED",
+	authorization := request.Header.Get("Authorization")
+	if authorization != "" {
+		s := strings.Split(authorization, " ")
+		if len(s) == 2 && s[0] == "Bearer" {
+			token := s[1]
+			_, err := utils.VerifyJwtToken(token)
+			if err == nil {
+				middleware.Handler.ServeHTTP(writer, request)
+				return
+			}
 		}
-
-		err := json.NewEncoder(writer).Encode(commonResponse)
-		helper.PanicIfError(err)
 	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusUnauthorized)
+
+	commonResponse := response.CommonResponse{
+		Code:   http.StatusUnauthorized,
+		Status: "UNAUTHORIZED",
+	}
+
+	err := json.NewEncoder(writer).Encode(commonResponse)
+	helper.PanicIfError(err)
+
 }

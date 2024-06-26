@@ -1,9 +1,9 @@
 package response
 
 type RegisterResponse struct {
-	Id    string
-	Name  string
-	NoHp  string
-	Email string
-	Role  string
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	NoHp  string `json:"noHp"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
 }

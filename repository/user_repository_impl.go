@@ -89,14 +89,15 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 }
 
 func (repository *UserRepositoryImpl) FindByEmailOrNoHp(ctx context.Context, tx *sql.Tx, emailOrNoHp string) (domain.User, error) {
-	query := "SELECT id,name,password FROM m_user WHERE email = ? OR no_hp = ?"
+	query := "SELECT id,name,password,role FROM m_user WHERE email = ? OR no_hp = ?"
 	rows, err := tx.QueryContext(ctx, query, emailOrNoHp, emailOrNoHp)
 	helper.PanicIfError(err)
 	defer rows.Close()
 
 	var user domain.User
 	if rows.Next() {
-		err := rows.Scan(&user.Id, &user.Name, &user.Password)
+		role := user.Role.String()
+		err := rows.Scan(&user.Id, &user.Name, &user.Password, &role)
 		helper.PanicIfError(err)
 		return user, nil
 	} else {
