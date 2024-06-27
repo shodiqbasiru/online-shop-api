@@ -35,6 +35,23 @@ func (controller *AuthController) Register(writer http.ResponseWriter, request *
 	helper.PanicIfError(err)
 }
 
+func (controller *AuthController) RegisterAdmin(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	registerRequest := payload.RegisterRequest{}
+	err := json.NewDecoder(request.Body).Decode(&registerRequest)
+	helper.PanicIfError(err)
+
+	registerResponse := controller.AuthService.RegisterAdmin(request.Context(), registerRequest)
+	commonResponse := response.CommonResponse{
+		Code:   http.StatusCreated,
+		Status: http.StatusText(http.StatusCreated),
+		Data:   registerResponse,
+	}
+
+	writer.Header().Add("Content-Type", "application/json")
+	err = json.NewEncoder(writer).Encode(commonResponse)
+	helper.PanicIfError(err)
+}
+
 func (controller *AuthController) LoginUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	loginRequest := payload.LoginRequest{}
 	err := json.NewDecoder(request.Body).Decode(&loginRequest)

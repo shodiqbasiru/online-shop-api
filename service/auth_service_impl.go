@@ -32,7 +32,7 @@ func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request reques
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	roleUser := domain.USER
+	role := domain.CUSTOMER
 	password, err := helper.HashPassword(request.Password)
 	helper.PanicIfError(err)
 
@@ -47,19 +47,45 @@ func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request reques
 		NoHp:       request.NoHp,
 		Email:      request.Email,
 		Password:   password,
-		Role:       roleUser,
+		Role:       role,
 		CustomerId: customer.Id,
 	}
 
 	user = service.UserRepository.Register(ctx, tx, user)
 
-	return response.RegisterResponse{
-		Id:           user.Id,
-		CustomerName: customer.CustomerName,
-		NoHp:         user.NoHp,
-		Email:        user.Email,
-		Role:         user.Role.String(),
+	return helper.ToRegisterResponse(user, customer)
+}
+
+func (service *AuthServiceImpl) RegisterAdmin(ctx context.Context, request request.RegisterRequest) response.RegisterResponse {
+	err := service.validate.Struct(request)
+	helper.PanicIfError(err)
+
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	role := domain.ADMIN
+	password, err := helper.HashPassword(request.Password)
+	helper.PanicIfError(err)
+
+	customer := domain.Customer{
+		CustomerName: request.CustomerName,
 	}
+
+	customer, err = service.CustomerService.CreateCustomer(ctx, customer)
+	helper.PanicIfError(err)
+
+	user := domain.User{
+		NoHp:       request.NoHp,
+		Email:      request.Email,
+		Password:   password,
+		Role:       role,
+		CustomerId: customer.Id,
+	}
+
+	user = service.UserRepository.Register(ctx, tx, user)
+
+	return helper.ToRegisterResponse(user, customer)
 }
 
 func (service *AuthServiceImpl) LoginUser(ctx context.Context, request request.LoginRequest) response.LoginResponse {
@@ -85,7 +111,7 @@ func (service *AuthServiceImpl) LoginUser(ctx context.Context, request request.L
 
 	return response.LoginResponse{
 		Id:    user.Id,
-		Role:  user.Role.String(),
+		Role:  user.Role,
 		Token: token,
 	}
 }

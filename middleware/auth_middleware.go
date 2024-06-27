@@ -19,7 +19,9 @@ func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
 
 func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
-	if request.URL.Path == "/api/auth/register" || request.URL.Path == "/api/auth/login" {
+	if request.URL.Path == "/api/auth/register" ||
+		request.URL.Path == "/api/auth/register-admin" ||
+		request.URL.Path == "/api/auth/login" {
 		middleware.Handler.ServeHTTP(writer, request)
 		return
 	}

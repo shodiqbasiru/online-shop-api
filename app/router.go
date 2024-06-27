@@ -30,6 +30,7 @@ func NewRouter(
 
 	// Auth Endpoint
 	router.POST("/api/auth/register", authController.Register)
+	router.POST("/api/auth/register-admin", authController.RegisterAdmin)
 	router.POST("/api/auth/login", authController.LoginUser)
 
 	// Customer EndPoint

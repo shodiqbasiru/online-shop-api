@@ -12,7 +12,7 @@ var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 func GenerateJwtToken(user domain.User) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["user_id"] = user.Id
-	claims["role"] = user.Role.String()
+	claims["role"] = user.Role
 	claims["aud"] = "online-shop-api"
 	claims["iss"] = "online-shop-api"
 	claims["iat"] = time.Now().Unix()

@@ -46,7 +46,7 @@ func (repository *CustomerRepositoryImpl) FindById(ctx context.Context, tx *sql.
 }
 
 func (repository *CustomerRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Customer {
-	query := "SELECT id, name, address FROM m_customer ORDER BY created_at DESC"
+	query := "SELECT c.id, c.name, c.address, u.role FROM m_customer c JOIN m_user u ON c.id = u.customer_id ORDER BY c.created_at DESC"
 	rows, err := tx.QueryContext(ctx, query)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -58,6 +58,7 @@ func (repository *CustomerRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 			&customer.Id,
 			&customer.CustomerName,
 			&customer.Address,
+			&customer.User.Role,
 		)
 		helper.PanicIfError(err)
 		customers = append(customers, customer)

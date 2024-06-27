@@ -8,5 +8,6 @@ import (
 
 type AuthService interface {
 	RegisterUser(ctx context.Context, request request.RegisterRequest) response.RegisterResponse
+	RegisterAdmin(ctx context.Context, request request.RegisterRequest) response.RegisterResponse
 	LoginUser(ctx context.Context, request request.LoginRequest) response.LoginResponse
 }

@@ -5,17 +5,11 @@ type User struct {
 	NoHp       string
 	Email      string
 	Password   string
-	Role       Role
+	Role       string
 	CustomerId string
 }
 
-type Role int
-
 const (
-	ADMIN Role = iota
-	USER
+	ADMIN    = "admin"
+	CUSTOMER = "customer"
 )
-
-func (r Role) String() string {
-	return [...]string{"ADMIN", "USER"}[r]
-}

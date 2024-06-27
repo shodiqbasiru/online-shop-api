@@ -14,8 +14,9 @@ import (
 
 type CustomerServiceImpl struct {
 	CustomerRepository repository.CustomerRepository
-	DB                 *sql.DB
-	Validate           *validator.Validate
+	AuthService
+	DB       *sql.DB
+	Validate *validator.Validate
 }
 
 func NewCustomerService(customerRepository repository.CustomerRepository, DB *sql.DB, validate *validator.Validate) CustomerService {

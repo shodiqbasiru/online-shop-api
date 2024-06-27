@@ -25,14 +25,14 @@ func (repository *UserRepositoryImpl) Register(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *UserRepositoryImpl) Login(ctx context.Context, tx *sql.Tx, email string, password string) domain.User {
-	query := "SELECT id FROM m_user WHERE email = ? AND password = ?"
+	query := "SELECT id, role FROM m_user WHERE email = ? AND password = ?"
 	rows, err := tx.QueryContext(ctx, query, email, password)
 	helper.PanicIfError(err)
 	defer rows.Close()
 
 	var user domain.User
 	if rows.Next() {
-		err := rows.Scan(&user.Id)
+		err := rows.Scan(&user.Id, &user.Role)
 		helper.PanicIfError(err)
 		return user
 	} else {
@@ -96,8 +96,7 @@ func (repository *UserRepositoryImpl) FindByEmailOrNoHp(ctx context.Context, tx 
 
 	var user domain.User
 	if rows.Next() {
-		role := user.Role.String()
-		err := rows.Scan(&user.Id, &user.Password, &role)
+		err := rows.Scan(&user.Id, &user.Password, &user.Role)
 		helper.PanicIfError(err)
 		return user, nil
 	} else {
