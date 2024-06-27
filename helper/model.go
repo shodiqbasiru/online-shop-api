@@ -36,5 +36,6 @@ func ToCustomerResponse(customer domain.Customer) response.CustomerResponse {
 		Id:           customer.Id,
 		CustomerName: customer.CustomerName,
 		Address:      customer.Address,
+		Role:         customer.User.Role.String(),
 	}
 }
