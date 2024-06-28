@@ -30,3 +30,22 @@ func ToProductResponse(product domain.Product) response.ProductResponse {
 		CategoryId:  product.CategoryId,
 	}
 }
+
+func ToCustomerResponse(customer domain.Customer) response.CustomerResponse {
+	return response.CustomerResponse{
+		Id:           customer.Id,
+		CustomerName: customer.CustomerName,
+		Address:      customer.Address,
+		Role:         customer.User.Role,
+	}
+}
+
+func ToRegisterResponse(user domain.User, customer domain.Customer) response.RegisterResponse {
+	return response.RegisterResponse{
+		Id:           user.Id,
+		CustomerName: customer.CustomerName,
+		NoHp:         user.NoHp,
+		Email:        user.Email,
+		Role:         user.Role,
+	}
+}

@@ -18,7 +18,32 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 		return
 	}
 
+	if badRequestError(writer, request, err) {
+		return
+	}
+
 	internalServerError(writer, request, err)
+}
+
+func badRequestError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+	exception, ok := err.(NotFoundError)
+	if ok {
+		writer.Header().Add("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+
+		commonResponse := response.CommonResponse{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   exception.Error,
+		}
+
+		errEncode := json.NewEncoder(writer).Encode(commonResponse)
+		helper.PanicIfError(errEncode)
+
+		return true
+	} else {
+		return false
+	}
 }
 
 func validationError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
@@ -64,6 +89,8 @@ func notFoundError(writer http.ResponseWriter, request *http.Request, err interf
 }
 
 func internalServerError(writer http.ResponseWriter, request *http.Request, err interface{}) {
+	//exception, ok := err.(InternalServerError)
+	//if ok {
 	writer.Header().Add("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusInternalServerError)
 
@@ -75,4 +102,8 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, err 
 
 	errEncode := json.NewEncoder(writer).Encode(commonResponse)
 	helper.PanicIfError(errEncode)
+	//return true
+	//} else {
+	//	return false
+	//}
 }
