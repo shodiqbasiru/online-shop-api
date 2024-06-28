@@ -33,7 +33,10 @@ func InitializedServer() *http.Server {
 	authService := service.NewAuthService(userRepository, customerService, db, validate)
 	authController := controller.NewAuthController(authService)
 	customerController := controller.NewCustomerController(customerService)
-	router := NewRouter(categoryController, productController, authController, customerController)
+	orderRepository := repository.NewOrderRepository()
+	orderService := service.NewOrderService(orderRepository, customerService, productService, db, validate)
+	orderController := controller.NewOrderController(orderService)
+	router := NewRouter(categoryController, productController, authController, customerController, orderController)
 	authMiddleware := middleware.NewAuthMiddleware(router)
 	server := NewServer(authMiddleware)
 	return server

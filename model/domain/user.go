@@ -8,8 +8,3 @@ type User struct {
 	Role       string
 	CustomerId string
 }
-
-const (
-	ADMIN    = "admin"
-	CUSTOMER = "customer"
-)
