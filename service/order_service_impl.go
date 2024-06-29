@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-playground/validator/v10"
+	"online-shop-api/exception"
 	"online-shop-api/helper"
 	"online-shop-api/model/domain"
 	"online-shop-api/model/dto/request"
@@ -40,18 +41,24 @@ func (service *OrderServiceImpl) CreateOrder(ctx context.Context, request reques
 	for _, detailRequest := range request.OrderDetails {
 		product := service.ProductService.GetById(ctx, detailRequest.ProductId)
 
+		if product.Stock-detailRequest.Qty < 0 {
+			panic(exception.NewBadRequestError("Stock Product is not enough"))
+		}
+		product.Stock = product.Stock - detailRequest.Qty
+
+		service.ProductService.UpdateStock(ctx, domain.Product(product))
 		detail := domain.OrderDetail{
 			Qty:       detailRequest.Qty,
-			Price:     product.Price,
+			Price:     detailRequest.Qty * product.Price,
 			OrderId:   order.Id,
 			ProductId: product.Id,
 		}
 		orderDetails = append(orderDetails, detail)
 	}
-	orderDetails = service.CreateOrderDetails(ctx, orderDetails)
+	orderDetails = service.CreateOrderDetails(ctx, tx, orderDetails)
 
 	var detailsResponses []response.OrderDetailResponse
-	for _, detailResponse := range order.OrderDetails {
+	for _, detailResponse := range orderDetails {
 		detailsResponses = append(detailsResponses, response.OrderDetailResponse{
 			Id:        detailResponse.Id,
 			OrderId:   detailResponse.OrderId,
@@ -70,10 +77,6 @@ func (service *OrderServiceImpl) CreateOrder(ctx context.Context, request reques
 	}
 }
 
-func (service *OrderServiceImpl) CreateOrderDetails(ctx context.Context, orderDetail []domain.OrderDetail) []domain.OrderDetail {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
-
+func (service *OrderServiceImpl) CreateOrderDetails(ctx context.Context, tx *sql.Tx, orderDetail []domain.OrderDetail) []domain.OrderDetail {
 	return service.OrderRepository.SaveOrderDetails(ctx, tx, orderDetail)
 }
