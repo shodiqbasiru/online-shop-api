@@ -32,7 +32,7 @@ func (service *OrderServiceImpl) CreateOrder(ctx context.Context, request reques
 	customer := service.CustomerService.GetById(ctx, request.CustomerId)
 
 	order := domain.Order{
-		Status:     domain.STATUS_PENDING,
+		Status:     domain.StatusPending,
 		CustomerId: customer.Id,
 	}
 	order = service.OrderRepository.SaveOrder(ctx, tx, order)
@@ -151,7 +151,7 @@ func (service *OrderServiceImpl) UpdateStatusOrder(ctx context.Context, orderId 
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	currentOrder.Status = domain.STATUS_SUCCESS
+	currentOrder.Status = domain.StatusSuccess
 	service.OrderRepository.UpdateStatus(ctx, tx, currentOrder)
 
 	return "Updated Status Order Successfully"
@@ -162,13 +162,13 @@ func (service *OrderServiceImpl) TaskCancelOrder(ctx context.Context) error {
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	orders, err := service.OrderRepository.FindByStatus(ctx, tx, domain.STATUS_PENDING)
+	orders, err := service.OrderRepository.FindByStatus(ctx, tx, domain.StatusPending)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	for _, order := range orders {
-		order.Status = domain.STATUS_CANCEL
+		order.Status = domain.StatusCancel
 		service.OrderRepository.UpdateStatus(ctx, tx, order)
 	}
 

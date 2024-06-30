@@ -13,7 +13,7 @@ func TestGenerateToken(t *testing.T) {
 		NoHp:     "08123567",
 		Email:    "email.@gmail.com",
 		Password: "password",
-		Role:     domain.ADMIN,
+		Role:     domain.RoleAdmin,
 	}
 	token, err := utils.GenerateJwtToken(user)
 	if err != nil {

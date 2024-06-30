@@ -32,7 +32,7 @@ func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request reques
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	role := domain.CUSTOMER
+	role := domain.RoleCustomer
 	password, err := helper.HashPassword(request.Password)
 	helper.PanicIfError(err)
 
@@ -64,7 +64,7 @@ func (service *AuthServiceImpl) RegisterAdmin(ctx context.Context, request reque
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	role := domain.ADMIN
+	role := domain.RoleAdmin
 	password, err := helper.HashPassword(request.Password)
 	helper.PanicIfError(err)
 

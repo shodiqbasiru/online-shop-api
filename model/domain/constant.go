@@ -1,12 +1,12 @@
 package domain
 
 const (
-	ADMIN    = "admin"
-	CUSTOMER = "customer"
+	RoleAdmin    = "admin"
+	RoleCustomer = "customer"
 )
 
 const (
-	STATUS_SUCCESS = "success"
-	STATUS_PENDING = "pending"
-	STATUS_CANCEL  = "cancel"
+	StatusSuccess = "success"
+	StatusPending = "pending"
+	StatusCancel  = "cancel"
 )
