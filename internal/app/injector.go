@@ -15,6 +15,7 @@ import (
 	"online-shop-api/internal/repository"
 	"online-shop-api/internal/service"
 	"online-shop-api/scheduler"
+	"online-shop-api/utils"
 )
 
 func ProvideValidatorOptions() []validator.Option {
@@ -47,6 +48,7 @@ func InitializedServer() *http.Server {
 		wire.Bind(new(http.Handler), new(*httprouter.Router)),
 		middleware.NewAuthMiddleware,
 		NewServer,
+		utils.NewJWT,
 	)
 
 	return nil

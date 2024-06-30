@@ -16,6 +16,7 @@ import (
 	"online-shop-api/internal/repository"
 	"online-shop-api/internal/service"
 	"online-shop-api/scheduler"
+	"online-shop-api/utils"
 )
 
 // Injectors from injector.go:
@@ -34,7 +35,8 @@ func InitializedServer() *http.Server {
 	userRepository := repository.NewUserRepository()
 	customerRepository := repository.NewCustomerRepository()
 	customerService := service.NewCustomerService(customerRepository, db, validate)
-	authService := service.NewAuthService(userRepository, customerService, db, validate)
+	jwt := utils.NewJWT(configConfig)
+	authService := service.NewAuthService(userRepository, customerService, db, validate, jwt)
 	authController := controller.NewAuthController(authService)
 	customerController := controller.NewCustomerController(customerService)
 	orderRepository := repository.NewOrderRepository()
@@ -42,7 +44,7 @@ func InitializedServer() *http.Server {
 	schedulerScheduler := scheduler.NewScheduler(orderService)
 	orderController := controller.NewOrderController(orderService, schedulerScheduler)
 	router := NewRouter(categoryController, productController, authController, customerController, orderController)
-	authMiddleware := middleware.NewAuthMiddleware(router)
+	authMiddleware := middleware.NewAuthMiddleware(router, jwt)
 	server := NewServer(authMiddleware)
 	return server
 }

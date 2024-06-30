@@ -11,10 +11,11 @@ import (
 
 type AuthMiddleware struct {
 	Handler http.Handler
+	JWT     *utils.JWT
 }
 
-func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
-	return &AuthMiddleware{Handler: handler}
+func NewAuthMiddleware(handler http.Handler, JWT *utils.JWT) *AuthMiddleware {
+	return &AuthMiddleware{Handler: handler, JWT: JWT}
 }
 
 func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -31,7 +32,7 @@ func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request 
 		s := strings.Split(authorization, " ")
 		if len(s) == 2 && s[0] == "Bearer" {
 			token := s[1]
-			_, err := utils.VerifyJwtToken(token)
+			_, err := middleware.JWT.VerifyJwtToken(token)
 			if err == nil {
 				middleware.Handler.ServeHTTP(writer, request)
 				return
