@@ -55,6 +55,19 @@ func (controller *OrderController) FindById(writer http.ResponseWriter, request 
 	helper.PanicIfError(err)
 }
 
+func (controller *OrderController) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	orderResponses := controller.OrderService.GetAll(request.Context())
+	commonResponse := response.CommonResponse{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   orderResponses,
+	}
+
+	writer.Header().Add("Content-Type", "application/json")
+	err := json.NewEncoder(writer).Encode(commonResponse)
+	helper.PanicIfError(err)
+}
+
 func (controller *OrderController) UpdateStatusOrder(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	orderId := params.ByName("orderId")
 

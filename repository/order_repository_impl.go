@@ -83,6 +83,54 @@ func (repository *OrderRepositoryImpl) FindOrderId(ctx context.Context, tx *sql.
 
 	return order, nil
 }
+func (repository *OrderRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Order {
+	query := `
+		SELECT 
+			o.id, o.customer_id, o.status, o.created_at, 
+			od.id, od.order_id, od.product_id, od.qty, od.price
+		FROM 
+			t_order o 
+		LEFT JOIN 
+			t_order_detail od ON o.id = od.order_id`
+
+	rows, err := tx.QueryContext(ctx, query)
+	helper.PanicIfError(err)
+	defer rows.Close()
+
+	orderMap := make(map[string]*domain.Order)
+
+	for rows.Next() {
+		order := domain.Order{}
+		orderDetail := domain.OrderDetail{}
+
+		err := rows.Scan(
+			&order.Id,
+			&order.CustomerId,
+			&order.Status,
+			&order.TransDate,
+			&orderDetail.Id,
+			&orderDetail.OrderId,
+			&orderDetail.ProductId,
+			&orderDetail.Qty,
+			&orderDetail.Price,
+		)
+		helper.PanicIfError(err)
+
+		if existingOrder, ok := orderMap[order.Id]; ok {
+			existingOrder.OrderDetails = append(existingOrder.OrderDetails, orderDetail)
+		} else {
+			order.OrderDetails = append(order.OrderDetails, orderDetail)
+			orderMap[order.Id] = &order
+		}
+	}
+
+	var orders []domain.Order
+	for _, order := range orderMap {
+		orders = append(orders, *order)
+	}
+
+	return orders
+}
 
 func (repository *OrderRepositoryImpl) UpdateStatus(ctx context.Context, tx *sql.Tx, order domain.Order) domain.Order {
 	query := "UPDATE t_order SET status=? WHERE id=?"

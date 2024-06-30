@@ -111,6 +111,37 @@ func (service *OrderServiceImpl) GetById(ctx context.Context, orderId string) re
 	}
 }
 
+func (service *OrderServiceImpl) GetAll(ctx context.Context) []response.OrderResponse {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	orders := service.OrderRepository.FindAll(ctx, tx)
+
+	var orderResponses []response.OrderResponse
+	for _, order := range orders {
+		var orderDetails []response.OrderDetailResponse
+		for _, detail := range order.OrderDetails {
+			orderDetails = append(orderDetails, response.OrderDetailResponse{
+				Id:        detail.Id,
+				Qty:       detail.Qty,
+				Price:     detail.Price,
+				OrderId:   detail.OrderId,
+				ProductId: detail.ProductId,
+			})
+		}
+		orderResponses = append(orderResponses, response.OrderResponse{
+			Id:           order.Id,
+			TransDate:    order.TransDate,
+			Status:       order.Status,
+			CustomerId:   order.CustomerId,
+			OrderDetails: orderDetails,
+		})
+	}
+
+	return orderResponses
+}
+
 func (service *OrderServiceImpl) UpdateStatusOrder(ctx context.Context, orderId string) string {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
