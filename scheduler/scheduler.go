@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/go-co-op/gocron/v2"
 	"log"
-	"online-shop-api/helper"
-	"online-shop-api/service"
+	"online-shop-api/internal/helper"
+	"online-shop-api/internal/service"
 	"time"
 )
 

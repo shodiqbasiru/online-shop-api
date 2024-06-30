@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/golang-jwt/jwt/v5"
-	"online-shop-api/model/domain"
+	"online-shop-api/internal/model/domain"
 	"os"
 	"time"
 )
