@@ -72,11 +72,74 @@ func (service *OrderServiceImpl) CreateOrder(ctx context.Context, request reques
 		Id:           order.Id,
 		TransDate:    order.TransDate,
 		Status:       order.Status,
-		CustomerId:   order.Customer.Id,
+		CustomerId:   customer.Id,
 		OrderDetails: detailsResponses,
 	}
 }
 
 func (service *OrderServiceImpl) CreateOrderDetails(ctx context.Context, tx *sql.Tx, orderDetail []domain.OrderDetail) []domain.OrderDetail {
 	return service.OrderRepository.SaveOrderDetails(ctx, tx, orderDetail)
+}
+
+func (service *OrderServiceImpl) GetById(ctx context.Context, orderId string) response.OrderResponse {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	order, err := service.OrderRepository.FindOrderId(ctx, tx, orderId)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	var orderDetails []response.OrderDetailResponse
+	for _, detail := range order.OrderDetails {
+		orderDetails = append(orderDetails, response.OrderDetailResponse{
+			Id:        detail.Id,
+			Qty:       detail.Qty,
+			Price:     detail.Price,
+			OrderId:   detail.OrderId,
+			ProductId: detail.ProductId,
+		})
+	}
+
+	return response.OrderResponse{
+		Id:           order.Id,
+		TransDate:    order.TransDate,
+		Status:       order.Status,
+		CustomerId:   order.CustomerId,
+		OrderDetails: orderDetails,
+	}
+}
+
+func (service *OrderServiceImpl) UpdateStatusOrder(ctx context.Context, orderId string) string {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+	currentOrder, err := service.OrderRepository.FindOrderId(ctx, tx, orderId)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	currentOrder.Status = domain.STATUS_SUCCESS
+	service.OrderRepository.UpdateStatus(ctx, tx, currentOrder)
+
+	return "Updated Status Order Successfully"
+}
+
+func (service *OrderServiceImpl) TaskCancelOrder(ctx context.Context) error {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	orders, err := service.OrderRepository.FindByStatus(ctx, tx, domain.STATUS_PENDING)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	for _, order := range orders {
+		order.Status = domain.STATUS_CANCEL
+		service.OrderRepository.UpdateStatus(ctx, tx, order)
+	}
+
+	return nil
 }

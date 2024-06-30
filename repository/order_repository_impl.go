@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/google/uuid"
+	"log"
 	"online-shop-api/helper"
 	"online-shop-api/model/domain"
 )
@@ -31,4 +33,79 @@ func (repository *OrderRepositoryImpl) SaveOrderDetails(ctx context.Context, tx 
 		helper.PanicIfError(err)
 	}
 	return orderDetails
+}
+
+func (repository *OrderRepositoryImpl) FindOrderId(ctx context.Context, tx *sql.Tx, orderId string) (domain.Order, error) {
+	query := `
+		SELECT 
+			o.id, o.customer_id, o.status, o.created_at, 
+			od.id, od.order_id, od.product_id, od.qty, od.price
+		FROM 
+			t_order o 
+		JOIN 
+			t_order_detail od ON o.id = od.order_id 
+		WHERE 
+			o.id = ?`
+
+	rows, err := tx.QueryContext(ctx, query, orderId)
+	if err != nil {
+		log.Printf("Error executing query: %v", err)
+		return domain.Order{}, err
+	}
+	defer rows.Close()
+
+	var order domain.Order
+	order.OrderDetails = make([]domain.OrderDetail, 0)
+
+	for rows.Next() {
+		var detail domain.OrderDetail
+		err := rows.Scan(
+			&order.Id,
+			&order.CustomerId,
+			&order.Status,
+			&order.TransDate,
+			&detail.Id,
+			&detail.OrderId,
+			&detail.ProductId,
+			&detail.Qty,
+			&detail.Price,
+		)
+		if err != nil {
+			log.Printf("Error scanning row: %v", err)
+			return domain.Order{}, err
+		}
+		order.OrderDetails = append(order.OrderDetails, detail)
+	}
+
+	if len(order.OrderDetails) == 0 {
+		return domain.Order{}, errors.New("order not found")
+	}
+
+	return order, nil
+}
+
+func (repository *OrderRepositoryImpl) UpdateStatus(ctx context.Context, tx *sql.Tx, order domain.Order) domain.Order {
+	query := "UPDATE t_order SET status=? WHERE id=?"
+	_, err := tx.ExecContext(ctx, query, order.Status, order.Id)
+	helper.PanicIfError(err)
+	return order
+}
+
+func (repository *OrderRepositoryImpl) FindByStatus(ctx context.Context, tx *sql.Tx, status string) ([]domain.Order, error) {
+	query := "SELECT id, customer_id, status, created_at FROM t_order WHERE status = ?"
+	rows, err := tx.QueryContext(ctx, query, status)
+	helper.PanicIfError(err)
+	defer rows.Close()
+
+	var orders []domain.Order
+	for rows.Next() {
+		var order domain.Order
+		err := rows.Scan(&order.Id, &order.CustomerId, &order.Status, &order.TransDate)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
 }

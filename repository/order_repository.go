@@ -9,4 +9,7 @@ import (
 type OrderRepository interface {
 	SaveOrder(ctx context.Context, tx *sql.Tx, order domain.Order) domain.Order
 	SaveOrderDetails(ctx context.Context, tx *sql.Tx, orderDetails []domain.OrderDetail) []domain.OrderDetail
+	FindOrderId(ctx context.Context, tx *sql.Tx, orderId string) (domain.Order, error)
+	UpdateStatus(ctx context.Context, tx *sql.Tx, order domain.Order) domain.Order
+	FindByStatus(ctx context.Context, tx *sql.Tx, status string) ([]domain.Order, error)
 }

@@ -11,4 +11,7 @@ import (
 type OrderService interface {
 	CreateOrder(ctx context.Context, request request.OrderRequest) response.OrderResponse
 	CreateOrderDetails(ctx context.Context, tx *sql.Tx, orderDetail []domain.OrderDetail) []domain.OrderDetail
+	GetById(ctx context.Context, orderId string) response.OrderResponse
+	UpdateStatusOrder(ctx context.Context, orderId string) string
+	TaskCancelOrder(ctx context.Context) error
 }
