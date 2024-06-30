@@ -9,10 +9,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"online-shop-api/internal/controller"
+	"online-shop-api/internal/database"
 	"online-shop-api/internal/middleware"
 	"online-shop-api/internal/repository"
-	"online-shop-api/internal/scheduler"
 	"online-shop-api/internal/service"
+	"online-shop-api/scheduler"
 )
 
 func ProvideValidatorOptions() []validator.Option {
@@ -21,7 +22,7 @@ func ProvideValidatorOptions() []validator.Option {
 
 func InitializedServer() *http.Server {
 	wire.Build(
-		NewDB,
+		database.NewDB,
 		ProvideValidatorOptions,
 		validator.New,
 		repository.NewCategoryRepository,
