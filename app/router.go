@@ -42,6 +42,9 @@ func NewRouter(
 
 	// Order EndPoint
 	router.POST("/api/orders", orderController.CreateOrder)
+	router.GET("/api/orders/:orderId", orderController.FindById)
+	router.GET("/api/orders/:orderId/status", orderController.UpdateStatusOrder)
+	router.GET("/api/orders", orderController.FindAll)
 
 	router.PanicHandler = exception.ErrorHandler
 

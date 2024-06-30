@@ -11,6 +11,7 @@ import (
 	"online-shop-api/controller"
 	"online-shop-api/middleware"
 	"online-shop-api/repository"
+	"online-shop-api/scheduler"
 	"online-shop-api/service"
 )
 
@@ -38,6 +39,7 @@ func InitializedServer() *http.Server {
 		repository.NewOrderRepository,
 		service.NewOrderService,
 		controller.NewOrderController,
+		scheduler.NewScheduler,
 		NewRouter,
 		wire.Bind(new(http.Handler), new(*httprouter.Router)),
 		middleware.NewAuthMiddleware,

@@ -111,3 +111,17 @@ func (service *ProductServiceImpl) DeleteProduct(ctx context.Context, productId 
 
 	service.ProductRepository.Delete(ctx, tx, product)
 }
+
+func (service *ProductServiceImpl) UpdateStock(ctx context.Context, request domain.Product) {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	product, err := service.ProductRepository.FindById(ctx, tx, request.Id)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	product.Stock = request.Stock
+	service.ProductRepository.Update(ctx, tx, product)
+}

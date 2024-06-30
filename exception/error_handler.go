@@ -26,7 +26,7 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 }
 
 func badRequestError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
-	exception, ok := err.(NotFoundError)
+	exception, ok := err.(BadRequestError)
 	if ok {
 		writer.Header().Add("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusBadRequest)

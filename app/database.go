@@ -3,11 +3,16 @@ package app
 import (
 	"database/sql"
 	"online-shop-api/helper"
+	"os"
 	"time"
 )
 
+var dbName = []byte(os.Getenv("DB_NAME"))
+var dbUser = []byte(os.Getenv("DB_USER"))
+var dbPassword = []byte(os.Getenv("DB_PASS"))
+
 func NewDB() *sql.DB {
-	db, err := sql.Open("mysql", "root:ShodiqB20@tcp(localhost:3306)/db_online_shop")
+	db, err := sql.Open("mysql", string(dbUser)+":"+string(dbPassword)+"@tcp(localhost:3306)/"+string(dbName)+"?parseTime=true")
 	helper.PanicIfError(err)
 
 	db.SetMaxIdleConns(5)
