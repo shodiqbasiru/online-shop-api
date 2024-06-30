@@ -2,14 +2,14 @@ package utils
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"online-shop-api/internal/config"
 	"online-shop-api/internal/model/domain"
-	"os"
 	"time"
 )
 
-var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
-
 func GenerateJwtToken(user domain.User) (string, error) {
+	secretKey := config.GetJwtConfig()
+
 	claims := jwt.MapClaims{}
 	claims["user_id"] = user.Id
 	claims["role"] = user.Role
@@ -23,6 +23,8 @@ func GenerateJwtToken(user domain.User) (string, error) {
 }
 
 func VerifyJwtToken(token string) (jwt.MapClaims, error) {
+	secretKey := config.GetJwtConfig()
+
 	tokenParse, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid

@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"online-shop-api/internal/controller"
+	"online-shop-api/internal/database"
 	"online-shop-api/internal/middleware"
 	"online-shop-api/internal/repository"
 	"online-shop-api/internal/service"
@@ -20,7 +21,7 @@ import (
 
 func InitializedServer() *http.Server {
 	categoryRepository := repository.NewCategoryRepository()
-	db := NewDB()
+	db := database.NewDB()
 	v := ProvideValidatorOptions()
 	validate := validator.New(v...)
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
