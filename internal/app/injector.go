@@ -8,6 +8,7 @@ import (
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"online-shop-api/internal/config"
 	"online-shop-api/internal/controller"
 	"online-shop-api/internal/database"
 	"online-shop-api/internal/middleware"
@@ -22,6 +23,7 @@ func ProvideValidatorOptions() []validator.Option {
 
 func InitializedServer() *http.Server {
 	wire.Build(
+		config.NewConfig,
 		database.NewDB,
 		ProvideValidatorOptions,
 		validator.New,

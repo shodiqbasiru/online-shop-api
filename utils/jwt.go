@@ -8,7 +8,8 @@ import (
 )
 
 func GenerateJwtToken(user domain.User) (string, error) {
-	secretKey := config.GetJwtConfig()
+	jwtConfig := config.NewConfig()
+	secretKey := jwtConfig.GetJwtConfig()
 
 	claims := jwt.MapClaims{}
 	claims["user_id"] = user.Id
@@ -23,7 +24,8 @@ func GenerateJwtToken(user domain.User) (string, error) {
 }
 
 func VerifyJwtToken(token string) (jwt.MapClaims, error) {
-	secretKey := config.GetJwtConfig()
+	jwtConfig := config.NewConfig()
+	secretKey := jwtConfig.GetJwtConfig()
 
 	tokenParse, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
