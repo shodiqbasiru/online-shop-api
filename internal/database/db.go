@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func NewDB() *sql.DB {
+func NewDB(config *config.Config) *sql.DB {
 	dbHost, dbPort, dbName, dbUser, dbPassword := config.GetDatabaseConfig()
 
 	datasource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbPort, dbName)

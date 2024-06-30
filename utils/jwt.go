@@ -7,8 +7,16 @@ import (
 	"time"
 )
 
-func GenerateJwtToken(user domain.User) (string, error) {
-	secretKey := config.GetJwtConfig()
+type JWT struct {
+	Config *config.Config
+}
+
+func NewJWT(config *config.Config) *JWT {
+	return &JWT{Config: config}
+}
+
+func (j *JWT) GenerateJwtToken(user domain.User) (string, error) {
+	secretKey := j.Config.GetJwtConfig()
 
 	claims := jwt.MapClaims{}
 	claims["user_id"] = user.Id
@@ -22,8 +30,8 @@ func GenerateJwtToken(user domain.User) (string, error) {
 	return token.SignedString(secretKey)
 }
 
-func VerifyJwtToken(token string) (jwt.MapClaims, error) {
-	secretKey := config.GetJwtConfig()
+func (j *JWT) VerifyJwtToken(token string) (jwt.MapClaims, error) {
+	secretKey := j.Config.GetJwtConfig()
 
 	tokenParse, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

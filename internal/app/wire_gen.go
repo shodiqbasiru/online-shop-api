@@ -9,19 +9,22 @@ package app
 import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"online-shop-api/internal/config"
 	"online-shop-api/internal/controller"
 	"online-shop-api/internal/database"
 	"online-shop-api/internal/middleware"
 	"online-shop-api/internal/repository"
 	"online-shop-api/internal/service"
 	"online-shop-api/scheduler"
+	"online-shop-api/utils"
 )
 
 // Injectors from injector.go:
 
 func InitializedServer() *http.Server {
 	categoryRepository := repository.NewCategoryRepository()
-	db := database.NewDB()
+	configConfig := config.NewConfig()
+	db := database.NewDB(configConfig)
 	v := ProvideValidatorOptions()
 	validate := validator.New(v...)
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
@@ -32,7 +35,8 @@ func InitializedServer() *http.Server {
 	userRepository := repository.NewUserRepository()
 	customerRepository := repository.NewCustomerRepository()
 	customerService := service.NewCustomerService(customerRepository, db, validate)
-	authService := service.NewAuthService(userRepository, customerService, db, validate)
+	jwt := utils.NewJWT(configConfig)
+	authService := service.NewAuthService(userRepository, customerService, db, validate, jwt)
 	authController := controller.NewAuthController(authService)
 	customerController := controller.NewCustomerController(customerService)
 	orderRepository := repository.NewOrderRepository()
@@ -40,7 +44,7 @@ func InitializedServer() *http.Server {
 	schedulerScheduler := scheduler.NewScheduler(orderService)
 	orderController := controller.NewOrderController(orderService, schedulerScheduler)
 	router := NewRouter(categoryController, productController, authController, customerController, orderController)
-	authMiddleware := middleware.NewAuthMiddleware(router)
+	authMiddleware := middleware.NewAuthMiddleware(router, jwt)
 	server := NewServer(authMiddleware)
 	return server
 }

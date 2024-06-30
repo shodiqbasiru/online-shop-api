@@ -18,10 +18,11 @@ type AuthServiceImpl struct {
 	CustomerService
 	DB       *sql.DB
 	validate *validator.Validate
+	JWT      *utils.JWT
 }
 
-func NewAuthService(userRepository repository.UserRepository, customerService CustomerService, DB *sql.DB, validate *validator.Validate) AuthService {
-	return &AuthServiceImpl{UserRepository: userRepository, CustomerService: customerService, DB: DB, validate: validate}
+func NewAuthService(userRepository repository.UserRepository, customerService CustomerService, DB *sql.DB, validate *validator.Validate, JWT *utils.JWT) AuthService {
+	return &AuthServiceImpl{UserRepository: userRepository, CustomerService: customerService, DB: DB, validate: validate, JWT: JWT}
 }
 
 func (service *AuthServiceImpl) RegisterUser(ctx context.Context, request request.RegisterRequest) response.RegisterResponse {
@@ -106,7 +107,7 @@ func (service *AuthServiceImpl) LoginUser(ctx context.Context, request request.L
 		panic(exception.NewBadRequestError("email or password is wrong"))
 	}
 
-	token, err := utils.GenerateJwtToken(user)
+	token, err := service.JWT.GenerateJwtToken(user)
 	helper.PanicIfError(err)
 
 	return response.LoginResponse{

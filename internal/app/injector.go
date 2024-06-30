@@ -8,12 +8,14 @@ import (
 	"github.com/google/wire"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"online-shop-api/internal/config"
 	"online-shop-api/internal/controller"
 	"online-shop-api/internal/database"
 	"online-shop-api/internal/middleware"
 	"online-shop-api/internal/repository"
 	"online-shop-api/internal/service"
 	"online-shop-api/scheduler"
+	"online-shop-api/utils"
 )
 
 func ProvideValidatorOptions() []validator.Option {
@@ -22,6 +24,7 @@ func ProvideValidatorOptions() []validator.Option {
 
 func InitializedServer() *http.Server {
 	wire.Build(
+		config.NewConfig,
 		database.NewDB,
 		ProvideValidatorOptions,
 		validator.New,
@@ -45,6 +48,7 @@ func InitializedServer() *http.Server {
 		wire.Bind(new(http.Handler), new(*httprouter.Router)),
 		middleware.NewAuthMiddleware,
 		NewServer,
+		utils.NewJWT,
 	)
 
 	return nil
